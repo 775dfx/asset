@@ -44,3 +44,5 @@ yarn-error.log*
 
 id_ed25519_775dfx_github
 id_ed25519_775dfx_github.pub
+
+ssh-wrapper.bat
