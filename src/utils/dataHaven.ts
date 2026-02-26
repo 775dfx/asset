@@ -75,9 +75,15 @@ type StorageHubClients = {
 type MspInfo = Awaited<ReturnType<MspClient["info"]["getInfo"]>>;
 
 const dataHavenChainId = Number(import.meta.env.VITE_DATAHAVEN_CHAIN_ID ?? 55931);
-const dataHavenRpcUrl = import.meta.env.VITE_DATAHAVEN_RPC_URL;
-const dataHavenWsUrl = import.meta.env.VITE_DATAHAVEN_WSS_URL;
-const dataHavenMspUrl = import.meta.env.VITE_DATAHAVEN_MSP_URL;
+const dataHavenRpcUrl =
+  import.meta.env.VITE_DATAHAVEN_RPC_URL ||
+  "https://services.datahaven-testnet.network/testnet";
+const dataHavenWsUrl =
+  import.meta.env.VITE_DATAHAVEN_WSS_URL ||
+  "wss://services.datahaven-testnet.network/testnet";
+const dataHavenMspUrl =
+  import.meta.env.VITE_DATAHAVEN_MSP_URL ||
+  "https://deo-dh-backend.testnet.datahaven-infra.network/";
 const dataHavenMspTimeoutMs = Number(
   import.meta.env.VITE_DATAHAVEN_MSP_TIMEOUT_MS ?? 300000
 );

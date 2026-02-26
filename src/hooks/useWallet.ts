@@ -35,7 +35,7 @@ export const useWallet = () => {
   });
 
   const dataHavenChainId = Number(import.meta.env.VITE_DATAHAVEN_CHAIN_ID ?? 55931);
-  const dataHavenRpcUrl = import.meta.env.VITE_DATAHAVEN_RPC_URL;
+  const dataHavenRpcUrl = import.meta.env.VITE_DATAHAVEN_RPC_URL || "https://services.datahaven-testnet.network/testnet";
   const provider = useMemo(() => getInjectedProvider(), []);
 
   const refreshWallet = useCallback(async () => {
