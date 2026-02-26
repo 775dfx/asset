@@ -87,8 +87,11 @@ const dataHavenMspUrl =
 const dataHavenMspTimeoutMs = Number(
   import.meta.env.VITE_DATAHAVEN_MSP_TIMEOUT_MS ?? 300000
 );
-const dataHavenFilesystemAddress = import.meta.env
-  .VITE_DATAHAVEN_FILESYSTEM_ADDRESS as `0x${string}` | undefined;
+const dataHavenFilesystemAddress =
+  (import.meta.env.VITE_DATAHAVEN_FILESYSTEM_ADDRESS as
+    | `0x${string}`
+    | undefined) ||
+  ("0x0000000000000000000000000000000000000404" as `0x${string}`);
 
 let storageHubPromise: Promise<StorageHubClients> | null = null;
 let polkadotApiPromise: Promise<ApiPromise> | null = null;
