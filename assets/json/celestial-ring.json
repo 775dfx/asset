@@ -1,0 +1,8 @@
+{
+  "name": "Celestial Ring",
+  "type": "Accessory",
+  "damage": 0,
+  "rarity": "Legendary",
+  "levelRequired": 10,
+  "durability": 200
+}

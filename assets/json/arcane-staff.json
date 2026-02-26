@@ -1,0 +1,8 @@
+{
+  "name": "Arcane Staff",
+  "type": "Weapon",
+  "damage": 22,
+  "rarity": "Epic",
+  "levelRequired": 4,
+  "durability": 75
+}

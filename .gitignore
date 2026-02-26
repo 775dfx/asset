@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# vite
+/dist
+
 # production
 /build
 
@@ -38,4 +41,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+
+id_ed25519_775dfx_github
+id_ed25519_775dfx_github.pub

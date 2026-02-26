@@ -1,0 +1,8 @@
+{
+  "name": "Ember Axe",
+  "type": "Weapon",
+  "damage": 18,
+  "rarity": "Rare",
+  "levelRequired": 3,
+  "durability": 90
+}

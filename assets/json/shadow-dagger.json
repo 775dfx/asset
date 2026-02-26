@@ -1,0 +1,8 @@
+{
+  "name": "Shadow Dagger",
+  "type": "Weapon",
+  "damage": 12,
+  "rarity": "Rare",
+  "levelRequired": 2,
+  "durability": 70
+}

@@ -1,0 +1,13 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.6.2
+2 info using node@v24.13.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\Dee\asset\.npmrc
+5 silly config load:file:C:\Users\Dee\.npmrc
+6 silly config load:file:C:\Users\Dee\asset\.hardhat\npm\etc\npmrc
+7 verbose title npm exec hardhat node --hostname 127.0.0.1 --port 8545
+8 verbose argv "exec" "--" "hardhat" "node" "--hostname" "127.0.0.1" "--port" "8545"
+9 verbose logfile logs-max:10 dir:C:\Users\Dee\asset\.hardhat\npm-cache\_logs\2026-02-24T16_39_17_075Z-
+10 verbose logfile C:\Users\Dee\asset\.hardhat\npm-cache\_logs\2026-02-24T16_39_17_075Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files

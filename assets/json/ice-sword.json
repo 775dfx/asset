@@ -1,0 +1,8 @@
+{
+  "name": "Ice Sword",
+  "type": "Weapon",
+  "damage": 25,
+  "rarity": "Epic",
+  "levelRequired": 5,
+  "durability": 100
+}

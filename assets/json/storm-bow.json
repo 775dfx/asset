@@ -1,0 +1,8 @@
+{
+  "name": "Storm Bow",
+  "type": "Weapon",
+  "damage": 15,
+  "rarity": "Common",
+  "levelRequired": 1,
+  "durability": 80
+}
