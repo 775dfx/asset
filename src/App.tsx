@@ -5,6 +5,7 @@ import { SectionCard } from "./components/SectionCard";
 import { UploadPanel } from "./components/UploadPanel";
 import { AssetsPanel } from "./components/AssetsPanel";
 import { Footer } from "./components/Footer";
+import { Button } from "./components/Button";
 import { useWallet } from "./hooks/useWallet";
 import {
   createBucket,
@@ -47,7 +48,7 @@ const jsonPreviewSvg = (label: string) =>
 
 export default function App() {
   // Wallet state
-  const { wallet, connect, switchToDataHaven, dataHavenChainId } = useWallet();
+  const { wallet, connect, disconnect, switchToDataHaven, dataHavenChainId } = useWallet();
   // DataHaven state
   const [bucketName, setBucketName] = useState("game-asset-vault");
   const [bucketId, setBucketId] = useState<string | undefined>();
@@ -56,6 +57,7 @@ export default function App() {
   // UI state
   const [status, setStatus] = useState<StatusMessage>(defaultStatus);
   const [assets, setAssets] = useState<AssetMeta[]>([]);
+  const [previewAsset, setPreviewAsset] = useState<AssetMeta | null>(null);
 
   // Short address for the header
   const addressShort = useMemo(() => {
@@ -118,6 +120,15 @@ export default function App() {
         message: (error as Error).message,
       });
     }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    setBucketId(undefined);
+    setFile(undefined);
+    setPreparedUpload(undefined);
+    setAssets([]);
+    setStatus(defaultStatus);
   };
 
   const handleSwitchNetwork = async () => {
@@ -312,7 +323,7 @@ export default function App() {
       });
       return;
     }
-    window.open(asset.previewUrl, "_blank");
+    setPreviewAsset(asset);
   };
 
   // Asset download
@@ -397,13 +408,19 @@ export default function App() {
         previewUrl: jsonPreviewSvg(parsed.name ?? "JSON Asset"),
       };
     }
+    const imageMime =
+      blob.type && blob.type !== "application/octet-stream"
+        ? blob.type
+        : "image/png";
+    const previewBlob =
+      blob.type === imageMime ? blob : new Blob([blob], { type: imageMime });
     return {
       cid,
       name: `Image Asset ${index + 1}`,
       type: "Image Asset",
       rarity: "Common",
-      mimeType: blob.type,
-      previewUrl: URL.createObjectURL(blob),
+      mimeType: imageMime,
+      previewUrl: URL.createObjectURL(previewBlob),
     };
   };
 
@@ -413,7 +430,9 @@ export default function App() {
         <Header
           address={addressShort}
           chainId={wallet.chainId}
+          isConnected={wallet.isConnected}
           onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
           expectedChainId={dataHavenChainId}
           onSwitchNetwork={handleSwitchNetwork}
         />
@@ -446,6 +465,57 @@ export default function App() {
           />
         </SectionCard>
       </div>
+      {previewAsset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div
+            className="absolute inset-0"
+            onClick={() => setPreviewAsset(null)}
+          />
+          <div className="relative z-10 mx-4 w-full max-w-3xl rounded-2xl border border-white/10 bg-vault-900/95 shadow-2xl p-4 md:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {previewAsset.name || "Asset preview"}
+                </h3>
+                <p className="mt-1 text-xs text-slate-400 break-all">
+                  CID: {previewAsset.cid}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                className="px-3 py-1.5 text-sm"
+                onClick={() => setPreviewAsset(null)}
+              >
+                Close
+              </Button>
+            </div>
+            <div className="mt-4 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden aspect-video">
+              {previewAsset.previewUrl ? (
+                <img
+                  src={previewAsset.previewUrl}
+                  alt={previewAsset.name}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <span className="text-sm text-slate-400">Preview unavailable</span>
+              )}
+            </div>
+            <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
+              <div>
+                Type: {previewAsset.type} ·{" "}
+                {previewAsset.mimeType ?? "unknown format"}
+              </div>
+              <Button
+                variant="secondary"
+                className="px-3 py-1.5 text-sm"
+                onClick={() => handleDownload(previewAsset)}
+              >
+                Download
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );

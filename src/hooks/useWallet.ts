@@ -74,6 +74,14 @@ export const useWallet = () => {
     return address;
   }, [provider]);
 
+  const disconnect = useCallback(() => {
+    setWallet({
+      address: undefined,
+      chainId: undefined,
+      isConnected: false,
+    });
+  }, []);
+
   const switchToDataHaven = useCallback(async () => {
     if (!provider) {
       throw new Error("EVM wallet not found. Install MetaMask, OKX, or another wallet.");
@@ -142,5 +150,5 @@ export const useWallet = () => {
     };
   }, [provider, refreshWallet]);
 
-  return { wallet, connect, switchToDataHaven, dataHavenChainId };
+  return { wallet, connect, disconnect, switchToDataHaven, dataHavenChainId };
 };

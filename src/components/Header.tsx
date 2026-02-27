@@ -3,6 +3,8 @@ type HeaderProps = {
   address?: string;
   chainId?: number;
   onConnect: () => void;
+  onDisconnect?: () => void;
+  isConnected?: boolean;
   expectedChainId?: number;
   onSwitchNetwork?: () => void;
 };
@@ -11,6 +13,8 @@ export const Header = ({
   address,
   chainId,
   onConnect,
+  onDisconnect,
+  isConnected,
   expectedChainId,
   onSwitchNetwork,
 }: HeaderProps) => (
@@ -42,7 +46,13 @@ export const Header = ({
             </div>
           </div>
         )}
-      <Button onClick={onConnect}>Connect Wallet</Button>
+      {isConnected ? (
+        <Button variant="secondary" onClick={onDisconnect}>
+          Disconnect Wallet
+        </Button>
+      ) : (
+        <Button onClick={onConnect}>Connect Wallet</Button>
+      )}
     </div>
   </header>
 );

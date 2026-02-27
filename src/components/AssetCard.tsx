@@ -19,7 +19,8 @@ export const AssetCard = ({ asset, onPreview, onDownload }: AssetCardProps) => (
         <img
           src={asset.previewUrl}
           alt={asset.name}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover cursor-zoom-in transition-transform duration-200 hover:scale-[1.03]"
+          onClick={() => onPreview(asset)}
         />
       ) : (
         <span className="text-sm text-slate-400">Preview unavailable</span>
