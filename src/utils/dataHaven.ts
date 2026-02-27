@@ -390,8 +390,8 @@ const waitForBackendFileReady = async (
   bucketId: string,
   fileKey: string
 ) => {
-  const maxAttempts = 40;
-  const delayMs = 5000;
+  const maxAttempts = 20;
+  const delayMs = 3000;
   for (let i = 0; i < maxAttempts; i += 1) {
     try {
       const fileInfo = await mspClient.files.getFileInfo(bucketId, fileKey);

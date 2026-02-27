@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Address } from "viem";
 import { Header } from "./components/Header";
 import { SectionCard } from "./components/SectionCard";
 import { UploadPanel } from "./components/UploadPanel";
@@ -236,42 +237,57 @@ export default function App() {
     }
   };
 
-  // Fetch user assets from the blockchain and DataHaven
-  const handleViewAssets = async () => {
-    try {
-      const address = await ensureWalletAddress();
-      const storageKey = `datahaven-assets:${address}`;
-      let cids: string[] = [];
-      if (isContractConfigured()) {
+  const loadAssetsForAddress = useCallback(
+    async (address: Address, options?: { silent?: boolean }) => {
+    const storageKey = `datahaven-assets:${address}`;
+    let cids: string[] = [];
+    if (isContractConfigured()) {
+      if (!options?.silent) {
         setStatus({
           state: "loading",
           message: "Switching to the contract network...",
         });
-        await ensureContractChain();
+      }
+      await ensureContractChain();
+      if (!options?.silent) {
         setStatus({
           state: "loading",
           message: "Reading CIDs from the smart contract...",
         });
-        cids = await getAssetsFromChain(address);
-      } else {
-        const stored = localStorage.getItem(storageKey);
-        cids = stored ? (JSON.parse(stored) as string[]) : [];
       }
+      cids = await getAssetsFromChain(address);
+    } else {
+      const stored = localStorage.getItem(storageKey);
+      cids = stored ? (JSON.parse(stored) as string[]) : [];
+    }
+    if (!options?.silent) {
       setStatus({
         state: "loading",
         message: "Loading assets from DataHaven...",
       });
-      const loadedAssets = await Promise.all(
-        cids.map(async (cid, index) => {
-          const blob = await getFile(cid);
-          return buildAssetMetaFromBlob(cid, blob, index);
-        })
-      );
+    }
+    const loadedAssets = await Promise.all(
+      cids.map(async (cid, index) => {
+        const blob = await getFile(cid);
+        return buildAssetMetaFromBlob(cid, blob, index);
+      })
+    );
       setAssets(loadedAssets);
-      setStatus({
-        state: "success",
-        message: `Assets loaded: ${loadedAssets.length}`,
-      });
+      if (!options?.silent) {
+        setStatus({
+          state: "success",
+          message: `Assets loaded: ${loadedAssets.length}`,
+        });
+      }
+    },
+    []
+  );
+
+  // Fetch user assets from the blockchain and DataHaven
+  const handleViewAssets = async () => {
+    try {
+      const address = await ensureWalletAddress();
+      await loadAssetsForAddress(address);
     } catch (error) {
       setStatus({
         state: "error",
@@ -279,6 +295,13 @@ export default function App() {
       });
     }
   };
+
+  useEffect(() => {
+    if (!wallet.address) {
+      return;
+    }
+    loadAssetsForAddress(wallet.address, { silent: true }).catch(() => undefined);
+  }, [wallet.address, loadAssetsForAddress]);
 
   // Asset preview
   const handlePreview = (asset: AssetMeta) => {
