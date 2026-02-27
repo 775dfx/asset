@@ -181,21 +181,7 @@ export default function App() {
     if (!file) {
       setStatus({
         state: "error",
-        message: "Select a JSON or PNG file.",
-      });
-      return;
-    }
-    const fileName = file.name.toLowerCase();
-    const isJson = file.type === "application/json" || fileName.endsWith(".json");
-    const isPng = file.type === "image/png" || fileName.endsWith(".png");
-    const isJpg =
-      file.type === "image/jpeg" ||
-      fileName.endsWith(".jpg") ||
-      fileName.endsWith(".jpeg");
-    if (!isJson && !isPng && !isJpg) {
-      setStatus({
-        state: "error",
-        message: "Only JSON, PNG, or JPG files are supported.",
+        message: "Select a file to upload.",
       });
       return;
     }
@@ -234,11 +220,7 @@ export default function App() {
           message: `CID saved locally: ${uploadResult.cid}`,
         });
       }
-      const nextAsset: AssetMeta = await buildAssetMetaFromFile(
-        uploadResult.cid,
-        file,
-        uploadResult.mimeType
-      );
+      const nextAsset: AssetMeta = await buildAssetMetaFromFile(uploadResult.cid, file, uploadResult.mimeType);
       setAssets((prev) => [nextAsset, ...prev]);
     } catch (error) {
       setStatus({
@@ -294,19 +276,6 @@ export default function App() {
     []
   );
 
-  // Fetch user assets from the blockchain and DataHaven
-  const handleViewAssets = async () => {
-    try {
-      const address = await ensureWalletAddress();
-      await loadAssetsForAddress(address);
-    } catch (error) {
-      setStatus({
-        state: "error",
-        message: (error as Error).message,
-      });
-    }
-  };
-
   useEffect(() => {
     if (!wallet.address) {
       return;
@@ -337,11 +306,16 @@ export default function App() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      const extension =
-        asset.mimeType === "image/png" || asset.type === "Image Asset"
-          ? "png"
-          : "json";
-      link.download = `${asset.name}.${extension}`;
+      const mime = asset.mimeType ?? "";
+      let extension = "bin";
+      if (mime === "image/png") extension = "png";
+      else if (mime === "image/jpeg") extension = "jpg";
+      else if (mime === "application/json" || mime === "text/json") extension = "json";
+      else if (mime === "audio/mpeg") extension = "mp3";
+      else if (mime === "audio/wav") extension = "wav";
+      else if (mime === "audio/ogg") extension = "ogg";
+      const hasExtension = asset.name.includes(".");
+      link.download = hasExtension ? asset.name : `${asset.name}.${extension}`;
       link.click();
       URL.revokeObjectURL(url);
       setStatus({
@@ -362,28 +336,44 @@ export default function App() {
     inputFile: File,
     mimeType?: string
   ): Promise<AssetMeta> => {
-    if (inputFile.type === "application/json") {
+    const effectiveMime = mimeType ?? inputFile.type;
+    const lowerName = inputFile.name.toLowerCase();
+    if (
+      effectiveMime === "application/json" ||
+      effectiveMime === "text/json" ||
+      lowerName.endsWith(".json")
+    ) {
       const text = await inputFile.text();
       const parsed = JSON.parse(text) as Partial<AssetMeta>;
       return {
         cid,
         name: parsed.name ?? inputFile.name,
-        type: parsed.type ?? "Unknown",
+        type: parsed.type ?? "JSON Asset",
         rarity: (parsed.rarity as AssetMeta["rarity"]) ?? "Common",
         levelRequired: parsed.levelRequired,
         damage: parsed.damage,
         durability: parsed.durability,
-        mimeType: mimeType ?? inputFile.type,
+        mimeType: effectiveMime,
         previewUrl: jsonPreviewSvg(parsed.name ?? "JSON Asset"),
+      };
+    }
+    if (effectiveMime.startsWith("image/")) {
+      return {
+        cid,
+        name: inputFile.name,
+        type: "Image Asset",
+        rarity: "Common",
+        mimeType: effectiveMime,
+        previewUrl: URL.createObjectURL(inputFile),
       };
     }
     return {
       cid,
-      name: inputFile.name.replace(".png", ""),
-      type: "Image Asset",
+      name: inputFile.name,
+      type: "File Asset",
       rarity: "Common",
-      mimeType: mimeType ?? inputFile.type,
-      previewUrl: URL.createObjectURL(inputFile),
+      mimeType: effectiveMime,
+      previewUrl: jsonPreviewSvg(inputFile.name),
     };
   };
 
@@ -399,7 +389,7 @@ export default function App() {
       return {
         cid,
         name: parsed.name ?? `JSON Asset ${index + 1}`,
-        type: parsed.type ?? "Unknown",
+        type: parsed.type ?? "JSON Asset",
         rarity: (parsed.rarity as AssetMeta["rarity"]) ?? "Common",
         levelRequired: parsed.levelRequired,
         damage: parsed.damage,
@@ -408,19 +398,29 @@ export default function App() {
         previewUrl: jsonPreviewSvg(parsed.name ?? "JSON Asset"),
       };
     }
-    const imageMime =
-      blob.type && blob.type !== "application/octet-stream"
-        ? blob.type
-        : "image/png";
-    const previewBlob =
-      blob.type === imageMime ? blob : new Blob([blob], { type: imageMime });
+    if (blob.type.startsWith("image/") || blob.type === "application/octet-stream") {
+      const imageMime =
+        blob.type && blob.type !== "application/octet-stream"
+          ? blob.type
+          : "image/png";
+      const previewBlob =
+        blob.type === imageMime ? blob : new Blob([blob], { type: imageMime });
+      return {
+        cid,
+        name: `Image Asset ${index + 1}`,
+        type: "Image Asset",
+        rarity: "Common",
+        mimeType: imageMime,
+        previewUrl: URL.createObjectURL(previewBlob),
+      };
+    }
     return {
       cid,
-      name: `Image Asset ${index + 1}`,
-      type: "Image Asset",
+      name: `File Asset ${index + 1}`,
+      type: "File Asset",
       rarity: "Common",
-      mimeType: imageMime,
-      previewUrl: URL.createObjectURL(previewBlob),
+      mimeType: blob.type,
+      previewUrl: jsonPreviewSvg("File Asset"),
     };
   };
 
@@ -459,7 +459,6 @@ export default function App() {
         >
           <AssetsPanel
             assets={assets}
-            onViewAssets={handleViewAssets}
             onPreview={handlePreview}
             onDownload={handleDownload}
           />

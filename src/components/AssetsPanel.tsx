@@ -1,17 +1,14 @@
-import { Button } from "./Button";
 import { AssetGrid } from "./AssetGrid";
 import type { AssetMeta } from "../types";
 
 type AssetsPanelProps = {
   assets: AssetMeta[];
-  onViewAssets: () => void;
   onPreview: (asset: AssetMeta) => void;
   onDownload: (asset: AssetMeta) => void;
 };
 
 export const AssetsPanel = ({
   assets,
-  onViewAssets,
   onPreview,
   onDownload,
 }: AssetsPanelProps) => (
@@ -23,7 +20,6 @@ export const AssetsPanel = ({
           Assets are fetched by CID from DataHaven and the blockchain.
         </p>
       </div>
-      <Button onClick={onViewAssets}>View My Assets</Button>
     </div>
     {assets.length > 0 ? (
       <AssetGrid assets={assets} onPreview={onPreview} onDownload={onDownload} />

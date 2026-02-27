@@ -38,7 +38,7 @@ export const UploadPanel = ({
     </div>
     <div className="grid gap-4 md:grid-cols-[1fr_auto] items-end">
       <div>
-        <label className="text-sm text-slate-300">Upload JSON, PNG, or JPG</label>
+        <label className="text-sm text-slate-300">Upload any file</label>
         <div className="mt-2 flex items-center gap-3 rounded-xl bg-black/40 border border-white/10 px-4 py-3 text-sm">
           <label
             htmlFor="asset-file"
@@ -53,12 +53,14 @@ export const UploadPanel = ({
         <input
           id="asset-file"
           type="file"
-          accept=".json,image/png,image/jpeg"
+          accept="*/*"
           className="hidden"
           onChange={(event) => onFileChange(event.target.files?.[0])}
         />
         <div className="mt-2 text-xs text-slate-400">
-          {file ? "Ready to upload." : "Select a JSON, PNG, or JPG asset file."}
+          {file
+            ? "Ready to upload."
+            : "Select any file to store in DataHaven (images, audio, JSON, etc.)."}
         </div>
         <div className="mt-1 text-xs text-slate-500">
           Bucket: {bucketId ?? "not created"}
