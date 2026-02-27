@@ -67,7 +67,7 @@ export const UploadPanel = ({
         </div>
       </div>
       <Button variant="secondary" onClick={onUpload}>
-        Upload Asset
+        Upload
       </Button>
     </div>
     <StatusBanner state={status.state} message={status.message} />

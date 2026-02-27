@@ -51,9 +51,6 @@ export const AssetCard = ({ asset, onPreview, onDownload }: AssetCardProps) => {
           </span>
         </div>
         <p className="mt-1 text-sm text-slate-300">{asset.type}</p>
-        <div className="mt-2 text-xs uppercase tracking-[0.2em]">
-          {asset.rarity}
-        </div>
         <div className="mt-3 text-xs text-slate-400 break-all">
           CID: {asset.cid}
         </div>

@@ -463,7 +463,7 @@ export default function App() {
 
         <SectionCard
           title="DataHaven Upload"
-          subtitle="Create a bucket, upload JSON or PNG, and get a CID."
+          subtitle="Upload and anchor files to the network."
         >
           <UploadPanel
             bucketName={bucketName}
