@@ -8,6 +8,13 @@ export const assetVaultAbi = [
   },
   {
     type: "function",
+    name: "deleteAsset",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "cid", type: "string" }],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
     name: "getAssets",
     stateMutability: "view",
     inputs: [{ name: "user", type: "address" }],

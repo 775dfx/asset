@@ -5,12 +5,14 @@ type AssetsPanelProps = {
   assets: AssetMeta[];
   onPreview: (asset: AssetMeta) => void;
   onDownload: (asset: AssetMeta) => void;
+  onDelete: (asset: AssetMeta) => void;
 };
 
 export const AssetsPanel = ({
   assets,
   onPreview,
   onDownload,
+  onDelete,
 }: AssetsPanelProps) => (
   <div className="space-y-6">
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -22,7 +24,12 @@ export const AssetsPanel = ({
       </div>
     </div>
     {assets.length > 0 ? (
-      <AssetGrid assets={assets} onPreview={onPreview} onDownload={onDownload} />
+      <AssetGrid
+        assets={assets}
+        onPreview={onPreview}
+        onDownload={onDownload}
+        onDelete={onDelete}
+      />
     ) : (
       <div className="rounded-2xl border border-white/10 bg-black/30 p-6 text-sm text-slate-400">
         No assets uploaded yet.

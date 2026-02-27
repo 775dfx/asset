@@ -119,6 +119,23 @@ export const saveAssetOnChain = async (
   });
 };
 
+export const deleteAssetOnChain = async (
+  cid: string,
+  account: Address
+): Promise<`0x${string}`> => {
+  if (!contractAddress) {
+    throw new Error("VITE_CONTRACT_ADDRESS is not configured");
+  }
+  const walletClient = getWalletClient();
+  return walletClient.writeContract({
+    address: contractAddress,
+    abi: assetVaultAbi,
+    functionName: "deleteAsset",
+    args: [cid],
+    account,
+  });
+};
+
 // Read user CIDs from the contract
 export const getAssetsFromChain = async (
   account: Address

@@ -6,6 +6,7 @@ type AssetCardProps = {
   asset: AssetMeta;
   onPreview: (asset: AssetMeta) => void;
   onDownload: (asset: AssetMeta) => void;
+  onDelete: (asset: AssetMeta) => void;
 };
 
 const getFileTypeBadge = (asset: AssetMeta): string => {
@@ -23,7 +24,7 @@ const getFileTypeBadge = (asset: AssetMeta): string => {
   return "Other";
 };
 
-export const AssetCard = ({ asset, onPreview, onDownload }: AssetCardProps) => {
+export const AssetCard = ({ asset, onPreview, onDownload, onDelete }: AssetCardProps) => {
   const fileTypeBadge = getFileTypeBadge(asset);
   return (
     <div
@@ -60,6 +61,9 @@ export const AssetCard = ({ asset, onPreview, onDownload }: AssetCardProps) => {
           </Button>
           <Button variant="secondary" onClick={() => onDownload(asset)}>
             Download
+          </Button>
+          <Button variant="ghost" onClick={() => onDelete(asset)}>
+            Delete
           </Button>
         </div>
       </div>

@@ -20,6 +20,7 @@ import {
   getAssetsFromChain,
   isContractConfigured,
   saveAssetOnChain,
+  deleteAssetOnChain,
 } from "./utils/web3";
 import type { AssetMeta, StatusMessage } from "./types";
 
@@ -232,39 +233,39 @@ export default function App() {
 
   const loadAssetsForAddress = useCallback(
     async (address: Address, options?: { silent?: boolean }) => {
-    const storageKey = `datahaven-assets:${address}`;
-    let cids: string[] = [];
-    if (isContractConfigured()) {
+      const storageKey = `datahaven-assets:${address}`;
+      let cids: string[] = [];
+      if (isContractConfigured()) {
+        if (!options?.silent) {
+          setStatus({
+            state: "loading",
+            message: "Switching to the contract network...",
+          });
+        }
+        await ensureContractChain();
+        if (!options?.silent) {
+          setStatus({
+            state: "loading",
+            message: "Reading CIDs from the smart contract...",
+          });
+        }
+        cids = await getAssetsFromChain(address);
+      } else {
+        const stored = localStorage.getItem(storageKey);
+        cids = stored ? (JSON.parse(stored) as string[]) : [];
+      }
       if (!options?.silent) {
         setStatus({
           state: "loading",
-          message: "Switching to the contract network...",
+          message: "Loading assets from DataHaven...",
         });
       }
-      await ensureContractChain();
-      if (!options?.silent) {
-        setStatus({
-          state: "loading",
-          message: "Reading CIDs from the smart contract...",
-        });
-      }
-      cids = await getAssetsFromChain(address);
-    } else {
-      const stored = localStorage.getItem(storageKey);
-      cids = stored ? (JSON.parse(stored) as string[]) : [];
-    }
-    if (!options?.silent) {
-      setStatus({
-        state: "loading",
-        message: "Loading assets from DataHaven...",
-      });
-    }
-    const loadedAssets = await Promise.all(
-      cids.map(async (cid, index) => {
-        const blob = await getFile(cid);
-        return buildAssetMetaFromBlob(cid, blob, index);
-      })
-    );
+      const loadedAssets = await Promise.all(
+        cids.map(async (cid, index) => {
+          const blob = await getFile(cid);
+          return buildAssetMetaFromBlob(cid, blob, index);
+        })
+      );
       setAssets(loadedAssets);
       if (!options?.silent) {
         setStatus({
@@ -321,6 +322,43 @@ export default function App() {
       setStatus({
         state: "success",
         message: "Download completed.",
+      });
+    } catch (error) {
+      setStatus({
+        state: "error",
+        message: (error as Error).message,
+      });
+    }
+  };
+
+  const handleDelete = async (asset: AssetMeta) => {
+    try {
+      const address = await ensureWalletAddress();
+      const storageKey = `datahaven-assets:${address}`;
+      if (isContractConfigured()) {
+        setStatus({
+          state: "loading",
+          message: "Switching to the contract network...",
+        });
+        await ensureContractChain();
+        setStatus({
+          state: "loading",
+          message: "Removing asset from the smart contract...",
+        });
+        await deleteAssetOnChain(asset.cid, address);
+      } else {
+        const stored = localStorage.getItem(storageKey);
+        const cids = stored ? (JSON.parse(stored) as string[]) : [];
+        const nextCids = cids.filter((cid) => cid !== asset.cid);
+        localStorage.setItem(storageKey, JSON.stringify(nextCids));
+      }
+      setAssets((prev) => prev.filter((item) => item.cid !== asset.cid));
+      if (previewAsset && previewAsset.cid === asset.cid) {
+        setPreviewAsset(null);
+      }
+      setStatus({
+        state: "success",
+        message: "Asset removed.",
       });
     } catch (error) {
       setStatus({
@@ -485,6 +523,7 @@ export default function App() {
             assets={assets}
             onPreview={handlePreview}
             onDownload={handleDownload}
+            onDelete={handleDelete}
           />
         </SectionCard>
       </div>
