@@ -18,9 +18,6 @@ export const AssetsPanel = ({
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div>
         <h3 className="text-lg font-semibold">My Assets</h3>
-        <p className="text-sm text-slate-300">
-          Assets are fetched by CID from DataHaven and the blockchain.
-        </p>
       </div>
     </div>
     {assets.length > 0 ? (
