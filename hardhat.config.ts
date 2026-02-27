@@ -2,7 +2,7 @@ import { config as loadEnv } from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 
-loadEnv();
+loadEnv({ override: true });
 
 const sepoliaRpcUrl = process.env.SEPOLIA_RPC_URL ?? "";
 const rawDeployerKey = (process.env.DEPLOYER_PRIVATE_KEY ?? "").trim();
