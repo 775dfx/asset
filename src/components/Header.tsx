@@ -23,9 +23,9 @@ export const Header = ({
       <p className="text-sm uppercase tracking-[0.3em] text-vault-400">
         Web3 Storage
       </p>
-      <h1 className="text-3xl md:text-4xl font-bold">Game Asset Vault</h1>
+      <h1 className="text-3xl md:text-4xl font-bold">AssetLayer</h1>
       <p className="text-slate-300 mt-2">
-        Store game assets in DataHaven and pin CIDs on-chain.
+        Decentralized storage interface powered by DataHaven.
       </p>
     </div>
     <div className="flex flex-col gap-2 items-start md:items-end">

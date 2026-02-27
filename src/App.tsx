@@ -383,7 +383,32 @@ export default function App() {
     blob: Blob,
     index: number
   ): Promise<AssetMeta> => {
-    if (blob.type === "application/json" || blob.type === "text/json") {
+    let inferredMime = blob.type;
+    if (!inferredMime || inferredMime === "application/octet-stream") {
+      const headerBytes = new Uint8Array(await blob.slice(0, 16).arrayBuffer());
+      const isPng =
+        headerBytes[0] === 0x89 &&
+        headerBytes[1] === 0x50 &&
+        headerBytes[2] === 0x4e &&
+        headerBytes[3] === 0x47;
+      const isJpeg =
+        headerBytes[0] === 0xff &&
+        headerBytes[1] === 0xd8 &&
+        headerBytes[2] === 0xff;
+      if (isPng) {
+        inferredMime = "image/png";
+      } else if (isJpeg) {
+        inferredMime = "image/jpeg";
+      } else {
+        const textSnippet = new TextDecoder()
+          .decode(headerBytes)
+          .trimStart();
+        if (textSnippet.startsWith("{") || textSnippet.startsWith("[")) {
+          inferredMime = "application/json";
+        }
+      }
+    }
+    if (inferredMime === "application/json" || inferredMime === "text/json") {
       const text = await blob.text();
       const parsed = JSON.parse(text) as Partial<AssetMeta>;
       return {
@@ -394,17 +419,16 @@ export default function App() {
         levelRequired: parsed.levelRequired,
         damage: parsed.damage,
         durability: parsed.durability,
-        mimeType: blob.type,
+        mimeType: inferredMime,
         previewUrl: jsonPreviewSvg(parsed.name ?? "JSON Asset"),
       };
     }
-    if (blob.type.startsWith("image/") || blob.type === "application/octet-stream") {
-      const imageMime =
-        blob.type && blob.type !== "application/octet-stream"
-          ? blob.type
-          : "image/png";
+    if (inferredMime.startsWith("image/")) {
+      const imageMime = inferredMime;
       const previewBlob =
-        blob.type === imageMime ? blob : new Blob([blob], { type: imageMime });
+        blob.type === imageMime || !blob.type
+          ? blob
+          : new Blob([blob], { type: imageMime });
       return {
         cid,
         name: `Image Asset ${index + 1}`,
@@ -419,7 +443,7 @@ export default function App() {
       name: `File Asset ${index + 1}`,
       type: "File Asset",
       rarity: "Common",
-      mimeType: blob.type,
+      mimeType: inferredMime || blob.type,
       previewUrl: jsonPreviewSvg("File Asset"),
     };
   };
