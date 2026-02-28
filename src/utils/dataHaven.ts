@@ -22,6 +22,7 @@ import {
   http,
   type Address,
 } from "viem";
+import { trackUpload } from "../lib/tracker";
 
 type InjectedProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -624,6 +625,11 @@ export const uploadFile = async (
   }
   input.onStatus?.("Waiting for MSP backend to mark file as ready...");
   await waitForBackendFileReady(mspClient, prepared.bucketId, fileKey);
+  try {
+    await trackUpload(fileKey);
+  } catch (error) {
+    console.warn("Tracking failed", error);
+  }
   return {
     cid: fileKey,
     mimeType: input.file.type,
