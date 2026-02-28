@@ -7,6 +7,10 @@ type UploadPanelProps = {
   bucketId?: string;
   file?: File;
   status: StatusMessage;
+  isTracking?: boolean;
+  trackingTxHash?: string | null;
+  trackingExplorerUrl?: string | null;
+  trackingError?: string | null;
   onBucketNameChange: (value: string) => void;
   onFileChange: (file?: File) => void;
   onCreateBucket: () => void;
@@ -18,6 +22,10 @@ export const UploadPanel = ({
   bucketId,
   file,
   status,
+  isTracking,
+  trackingTxHash,
+  trackingExplorerUrl,
+  trackingError,
   onBucketNameChange,
   onFileChange,
   onCreateBucket,
@@ -71,5 +79,23 @@ export const UploadPanel = ({
       </Button>
     </div>
     <StatusBanner state={status.state} message={status.message} />
+    {isTracking ? (
+      <div className="text-xs text-blue-200">Anchoring upload on-chain...</div>
+    ) : null}
+    {trackingTxHash && trackingExplorerUrl ? (
+      <a
+        className="text-xs text-blue-200 underline decoration-blue-200/60 underline-offset-4 hover:text-blue-100"
+        href={trackingExplorerUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        View tracking transaction
+      </a>
+    ) : null}
+    {!isTracking && trackingError ? (
+      <div className="text-xs text-amber-200">
+        File uploaded, but on-chain tracking failed.
+      </div>
+    ) : null}
   </div>
 );

@@ -22,6 +22,7 @@ import {
   saveAssetOnChain,
   deleteAssetOnChain,
 } from "./utils/web3";
+import { getExplorerUrl, trackUpload } from "./lib/tracker";
 import type { AssetMeta, StatusMessage } from "./types";
 
 // Default UI status
@@ -59,6 +60,9 @@ export default function App() {
   const [status, setStatus] = useState<StatusMessage>(defaultStatus);
   const [assets, setAssets] = useState<AssetMeta[]>([]);
   const [previewAsset, setPreviewAsset] = useState<AssetMeta | null>(null);
+  const [isTracking, setIsTracking] = useState(false);
+  const [trackingTxHash, setTrackingTxHash] = useState<string | null>(null);
+  const [trackingError, setTrackingError] = useState<string | null>(null);
 
   // Short address for the header
   const addressShort = useMemo(() => {
@@ -223,6 +227,33 @@ export default function App() {
       }
       const nextAsset: AssetMeta = await buildAssetMetaFromFile(uploadResult.cid, file, uploadResult.mimeType);
       setAssets((prev) => [nextAsset, ...prev]);
+      setTrackingTxHash(null);
+      setTrackingError(null);
+      setIsTracking(true);
+      setStatus({
+        state: "loading",
+        message: "Anchoring upload on-chain...",
+      });
+      const trackingResult = await trackUpload(uploadResult.cid);
+      setIsTracking(false);
+      if (trackingResult.success) {
+        setTrackingTxHash(trackingResult.txHash ?? null);
+        setStatus({
+          state: "success",
+          message: trackingResult.txHash
+            ? `Upload anchored on-chain · Tx: ${trackingResult.txHash}`
+            : "Upload anchored on-chain.",
+        });
+      } else {
+        setTrackingError(trackingResult.error ?? "TRACKING_FAILED");
+        setStatus({
+          state: "success",
+          message:
+            trackingResult.error === "USER_REJECTED"
+              ? "File uploaded, on-chain tracking cancelled."
+              : "File uploaded, but on-chain tracking failed.",
+        });
+      }
     } catch (error) {
       setStatus({
         state: "error",
@@ -508,6 +539,10 @@ export default function App() {
             bucketId={bucketId}
             file={file}
             status={status}
+            isTracking={isTracking}
+            trackingTxHash={trackingTxHash}
+            trackingExplorerUrl={trackingTxHash ? getExplorerUrl(trackingTxHash) : null}
+            trackingError={trackingError}
             onBucketNameChange={setBucketName}
             onFileChange={setFile}
             onCreateBucket={handleCreateBucket}
